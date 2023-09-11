@@ -18,6 +18,7 @@ zephyr_library_sources(hal/mcu/am_hal_interrupt.c)
 zephyr_library_sources(hal/mcu/am_hal_mram.c)
 zephyr_library_sources(hal/mcu/am_hal_rtc.c)
 zephyr_library_sources(hal/mcu/am_hal_utils.c)
+zephyr_library_sources(hal/mcu/am_hal_mcuctrl.c)
 zephyr_library_sources(hal/am_hal_security.c)
 
 if(CONFIG_AMBIQ_HAL_USE_GPIO)
@@ -48,3 +49,4 @@ if(CONFIG_AMBIQ_HAL_USE_MSPI)
 endif()
 
 zephyr_include_directories(hal)
+zephyr_include_directories(hal/mcu)

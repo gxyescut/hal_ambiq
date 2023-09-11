@@ -1,6 +1,7 @@
 # Ambiq HAL
 #
 # Copyright (c) 2023 Antmicro Ltd <www.antmicro.com>
+# Copyright (c) 2023 Ambiq Micro Inc. <www.ambiq.com>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -17,6 +18,7 @@ zephyr_library_sources(hal/mcu/am_hal_interrupt.c)
 zephyr_library_sources(hal/mcu/am_hal_mram.c)
 zephyr_library_sources(hal/mcu/am_hal_rtc.c)
 zephyr_library_sources(hal/mcu/am_hal_utils.c)
+zephyr_library_sources(hal/am_hal_security.c)
 
 if(CONFIG_AMBIQ_HAL_USE_GPIO)
     zephyr_library_sources(hal/am_hal_gpio.c)
@@ -44,3 +46,5 @@ if(CONFIG_AMBIQ_HAL_USE_MSPI)
     zephyr_library_sources(hal/mcu/am_hal_mspi.c)
     zephyr_library_sources(hal/mcu/am_hal_cmdq.c)
 endif()
+
+zephyr_include_directories(hal)

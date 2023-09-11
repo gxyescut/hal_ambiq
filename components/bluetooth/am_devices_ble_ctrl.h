@@ -605,6 +605,10 @@ bool am_devices_ble_ctrl_get_fw_image(am_devices_ble_ctrl_sbl_update_data_t *pFw
 //*****************************************************************************
 void am_devices_ble_ctrl_handshake_recv(uint8_t* pBuf);
 
+void am_device_ble_ctrl_xo32m_on(void);
+
+void am_device_ble_ctrl_xo32m_off(void);
+
 #ifdef __cplusplus
 }
 #endif

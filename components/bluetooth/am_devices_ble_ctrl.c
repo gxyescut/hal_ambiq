@@ -28,10 +28,14 @@
 #include <zephyr/sys/util.h>
 #include <am_mcu_apollo.h>
 #include "am_hal_security.h"
+#include "am_hal_mcuctrl.h"
 #include "am_devices_ble_ctrl.h"
 #include "ble_fw_image.h"
 
 #include <zephyr/sys/printk.h>
+
+#define AM_DEVICES_COOPER_32M_CLK             46
+#define AM_DEVICES_COOPER_32K_CLK             4
 //*****************************************************************************
 //
 // Global variables.
@@ -47,6 +51,54 @@ static am_devices_ble_ctrl_sbl_update_data_t     g_sFwImage =
     0
 };
 static bool g_rxAck = false;
+
+//*****************************************************************************
+//
+//  BLE_32M_CLK (46) - BLE 32M CLK OUT.
+//
+//*****************************************************************************
+am_hal_gpio_pincfg_t g_AM_DEVICES_COOPER_32M_CLK =
+{
+    .GP.cfg_b.uFuncSel             = AM_HAL_PIN_46_CLKOUT_32M,
+    .GP.cfg_b.eGPInput             = AM_HAL_GPIO_PIN_INPUT_NONE,
+    .GP.cfg_b.eGPRdZero            = AM_HAL_GPIO_PIN_RDZERO_READPIN,
+    .GP.cfg_b.eIntDir              = AM_HAL_GPIO_PIN_INTDIR_NONE,
+    .GP.cfg_b.eGPOutCfg            = AM_HAL_GPIO_PIN_OUTCFG_DISABLE,
+    .GP.cfg_b.eDriveStrength       = AM_HAL_GPIO_PIN_DRIVESTRENGTH_12MA,
+    .GP.cfg_b.uSlewRate            = 0,
+    .GP.cfg_b.ePullup              = AM_HAL_GPIO_PIN_PULLUP_NONE,
+    .GP.cfg_b.uNCE                 = 0,
+    .GP.cfg_b.eCEpol               = AM_HAL_GPIO_PIN_CEPOL_ACTIVELOW,
+    .GP.cfg_b.uRsvd_0              = 0,
+    .GP.cfg_b.ePowerSw             = AM_HAL_GPIO_PIN_POWERSW_NONE,
+    .GP.cfg_b.eForceInputEn        = AM_HAL_GPIO_PIN_FORCEEN_NONE,
+    .GP.cfg_b.eForceOutputEn       = AM_HAL_GPIO_PIN_FORCEEN_NONE,
+    .GP.cfg_b.uRsvd_1              = 0,
+};
+
+//*****************************************************************************
+//
+//  BLE_32K_CLK (45) - BLE 32K CLK OUT.
+//
+//*****************************************************************************
+am_hal_gpio_pincfg_t g_AM_DEVICES_COOPER_32K_CLK =
+{
+    .GP.cfg_b.uFuncSel             = AM_HAL_PIN_4_32KHzXT,
+    .GP.cfg_b.eGPInput             = AM_HAL_GPIO_PIN_INPUT_NONE,
+    .GP.cfg_b.eGPRdZero            = AM_HAL_GPIO_PIN_RDZERO_READPIN,
+    .GP.cfg_b.eIntDir              = AM_HAL_GPIO_PIN_INTDIR_NONE,
+    .GP.cfg_b.eGPOutCfg            = AM_HAL_GPIO_PIN_OUTCFG_DISABLE,
+    .GP.cfg_b.eDriveStrength       = AM_HAL_GPIO_PIN_DRIVESTRENGTH_12MA,
+    .GP.cfg_b.uSlewRate            = 0,
+    .GP.cfg_b.ePullup              = AM_HAL_GPIO_PIN_PULLUP_NONE,
+    .GP.cfg_b.uNCE                 = 0,
+    .GP.cfg_b.eCEpol               = AM_HAL_GPIO_PIN_CEPOL_ACTIVELOW,
+    .GP.cfg_b.uRsvd_0              = 0,
+    .GP.cfg_b.ePowerSw             = AM_HAL_GPIO_PIN_POWERSW_NONE,
+    .GP.cfg_b.eForceInputEn        = AM_HAL_GPIO_PIN_FORCEEN_NONE,
+    .GP.cfg_b.eForceOutputEn       = AM_HAL_GPIO_PIN_FORCEEN_NONE,
+    .GP.cfg_b.uRsvd_1              = 0,
+};
 
 //*****************************************************************************
 //
@@ -218,6 +270,16 @@ static bool am_devices_ble_ctrl_sbl_update_state_data(uint32_t ui32updateType)
 
     return false;
 }
+
+void am_device_ble_ctrl_xo32m_on(void)
+{
+    am_hal_mcuctrl_control(AM_HAL_MCUCTRL_CONTROL_EXTCLK32M_KICK_START, (void *)&g_amHalMcuctrlArgBLEDefault);
+}
+
+void am_device_ble_ctrl_xo32m_off(void)
+{
+    am_hal_mcuctrl_control(AM_HAL_MCUCTRL_CONTROL_EXTCLK32M_DISABLE,(void *) &g_amHalMcuctrlArgBLEDefault);
+}
 //*****************************************************************************
 //
 //  Initialize the Firmware Update state machine
@@ -225,6 +287,11 @@ static bool am_devices_ble_ctrl_sbl_update_state_data(uint32_t ui32updateType)
 //*****************************************************************************
 void am_devices_ble_ctrl_fw_update_init(void)
 {
+    am_hal_gpio_pinconfig(AM_DEVICES_COOPER_32M_CLK, g_AM_DEVICES_COOPER_32M_CLK);
+    am_hal_gpio_pinconfig(AM_DEVICES_COOPER_32K_CLK, g_AM_DEVICES_COOPER_32K_CLK);
+    am_hal_mcuctrl_control(AM_HAL_MCUCTRL_CONTROL_EXTCLK32K_ENABLE, 0);
+    am_hal_mcuctrl_control(AM_HAL_MCUCTRL_CONTROL_EXTCLK32M_KICK_START, (void *)&g_amHalMcuctrlArgBLEDefault);
+
     // Initialize state machine
     gsSblUpdateState.ui32SblUpdateState = AM_DEVICES_BLE_CTRL_SBL_UPDATE_STATE_INIT;
     // Load the image address
